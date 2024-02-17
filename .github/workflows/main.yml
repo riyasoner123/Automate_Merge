@@ -16,14 +16,11 @@ jobs:
         with:
           node-version: '14'
 
-      - name: Get GitHub Token
-        id: token
-        run: echo "Token: ${{ secrets.GITHUB_TOKEN }}"
-
       - name: Execute script
-        uses: actions/github-script@v5
-        with:
-          github-token: ${{ steps.token.outputs.token }}
-          script: |
-            const mergePullRequests = require('./merge_prs');
-            await mergePullRequests(github, context);
+        run: |
+          npm install @octokit/rest
+          node -e "const octokit = require('@octokit/rest')(); \
+                   const mergePullRequests = require('./merge_prs'); \
+                   mergePullRequests(octokit, context)"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
