@@ -17,4 +17,4 @@ jobs:
           node-version: '14'
       - name: Execute script
         run: |
-          node merge_prs.js
+          node -e "require('./merge_prs').mergePullRequests(github, context)"
