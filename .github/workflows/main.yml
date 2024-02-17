@@ -11,10 +11,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Run script
+      - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '14'
+
+      - name: Get GitHub Token
+        id: token
+        run: echo "Token: ${{ secrets.GITHUB_TOKEN }}"
+
       - name: Execute script
-        run: |
-          node -e "require('./merge_prs').mergePullRequests(github, context)"
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ steps.token.outputs.token }}
+          script: |
+            const mergePullRequests = require('./merge_prs');
+            await mergePullRequests(github, context);
