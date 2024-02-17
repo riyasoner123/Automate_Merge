@@ -13,7 +13,7 @@ jobs:
         id: get-prs
         with:
           script: |
-            const { data: pullRequests } = await github.pulls.list({
+            const { data: pullRequests } = await github.pulls({
               owner: context.repo.owner,
               repo: context.repo.repo,
               state: 'open'
