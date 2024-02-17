@@ -1,0 +1,54 @@
+name: Automate PR merge
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+
+jobs:
+  automate-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get all PRs
+        uses: actions/github-script@v5
+        id: get-prs
+        with:
+          script: |
+            const { data: pullRequests } = await github.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open'
+            })
+            return pullRequests
+          
+      - name: Check PRs status
+        uses: actions/github-script@v5
+        id: check-prs
+        with:
+          script: |
+            const pullRequests = context.payload.pull_requests;
+            const approvedPRs = [];
+            for (const pr of pullRequests) {
+              const { data: reviews } = await github.pulls.listReviews({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number
+              });
+              const approvedReviews = reviews.filter(review => review.state === 'APPROVED');
+              if (approvedReviews.length >= 1) { // Change this to your desired number of approvals
+                approvedPRs.push(pr);
+              }
+            }
+            return approvedPRs;
+          
+      - name: Merge PRs
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const pullRequests = context.payload.pull_requests;
+            for (const pr of pullRequests) {
+              await github.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number
+              });
+            }
