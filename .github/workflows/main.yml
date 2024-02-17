@@ -25,7 +25,7 @@ jobs:
         id: check-prs
         with:
           script: |
-            const pullRequests = context.payload.pull_requests;
+            const pullRequests = context.payload;
             const approvedPRs = [];
             for (const pr of pullRequests) {
               const { data: reviews } = await github.pulls.listReviews({
@@ -44,7 +44,7 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
-            const pullRequests = context.payload.pull_requests;
+            const pullRequests = ${{ steps.get-prs.outputs }};
             for (const pr of pullRequests) {
               await github.pulls.merge({
                 owner: context.repo.owner,
